@@ -18,6 +18,8 @@ class ShiftProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  double payRate = 14.5;
+
   bool _isLoading = true;
   bool get isLoading => _isLoading;
 

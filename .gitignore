@@ -52,3 +52,5 @@ app.*.map.json
 /.firebaserc
 /firebase.json
 /shiftrek.code-workspace
+test.dart
+test2.dart

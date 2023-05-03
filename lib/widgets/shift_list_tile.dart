@@ -101,7 +101,7 @@ class ShiftListTile extends StatelessWidget {
                         size: 18,
                       ),
                       label: Text(
-                        '${shiftProvider.getShiftHoursForWeek(shift.date) * 12.5}',
+                        '${shiftProvider.getShiftHoursForWeek(shift.date) * shiftProvider.payRate}',
                         style: TextStyle(
                             color: MyColors.platinum.withAlpha(154),
                             fontSize: 12),

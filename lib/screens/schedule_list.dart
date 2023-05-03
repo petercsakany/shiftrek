@@ -41,7 +41,7 @@ class _ScheduleListState extends State<ScheduleList> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            const Text('Schedule List'),
+            const Text('Schedule List v1.1'),
             TextButton.icon(
                 onPressed: null,
                 icon: Icon(shiftProvider.statusIcon),
