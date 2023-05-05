@@ -5,6 +5,7 @@ import 'package:shiftrek/services/utils.dart';
 import 'package:shiftrek/widgets/shift_tile_menu.dart';
 
 import '../models/shift.dart';
+import '../services/my_revenue.dart';
 import '../services/shift_provider.dart';
 
 class ShiftListTile extends StatelessWidget {
@@ -101,7 +102,7 @@ class ShiftListTile extends StatelessWidget {
                         size: 18,
                       ),
                       label: Text(
-                        '${shiftProvider.getShiftHoursForWeek(shift.date) * shiftProvider.payRate}',
+                        '${shiftProvider.getWagesAfterTax(shiftProvider.getShiftHoursForWeek(shift.date) * MyRevenue.payRate)}',
                         style: TextStyle(
                             color: MyColors.platinum.withAlpha(154),
                             fontSize: 12),
