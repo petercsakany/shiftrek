@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:shiftrek/services/utils.dart';
 import '../models/shift.dart';
 import '../services/shift_provider.dart';
-import '../widgets/month_dropdown.dart';
 import '../widgets/shift_dismissible.dart';
 import '../widgets/year_dropdown.dart';
 
@@ -18,7 +19,10 @@ class ScheduleList extends StatefulWidget {
 
 class _ScheduleListState extends State<ScheduleList> {
   List<Shift> shifts = [];
+  List<DateTime> days = [];
   late ItemScrollController _itemScrollController;
+  final ItemPositionsListener _itemPositionsListener =
+      ItemPositionsListener.create();
 
   @override
   void initState() {
@@ -34,14 +38,15 @@ class _ScheduleListState extends State<ScheduleList> {
   @override
   Widget build(BuildContext mainContext) {
     final shiftProvider = Provider.of<ShiftProvider>(mainContext);
-    shifts = shiftProvider.getShiftsForMonth();
+    shifts = shiftProvider.shifts;
+    days = shiftProvider.getAllDaysOfYear(2023);
 
     return Scaffold(
       appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            const Text('Schedule List v1.1'),
+            const Text('Schedule List v1.2'),
             TextButton.icon(
                 onPressed: null,
                 icon: Icon(shiftProvider.statusIcon),
@@ -70,10 +75,45 @@ class _ScheduleListState extends State<ScheduleList> {
                               child: YearDropDown(),
                             ),
                           ),
-                          const Expanded(
+                          Expanded(
                             child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: MonthDropDown(),
+                              padding: const EdgeInsets.all(8.0),
+                              child: ValueListenableBuilder(
+                                valueListenable:
+                                    _itemPositionsListener.itemPositions,
+                                builder: (context, positions, _) {
+                                  int? monthDisplayed;
+                                  if (positions.isNotEmpty) {
+                                    monthDisplayed =
+                                        DateTime(DateTime.now().year, 1, 1)
+                                            .add(Duration(
+                                                days: positions.first.index))
+                                            .month;
+                                  }
+                                  return DropdownButton<int>(
+                                    value: monthDisplayed,
+                                    items: [
+                                      for (int i = 1; i <= 12; i++)
+                                        DropdownMenuItem(
+                                          value: i,
+                                          child: Text(DateTime.now().month == i
+                                              ? DateFormat.MMMM()
+                                                  .format(DateTime(2023, i))
+                                              : DateFormat.MMMM()
+                                                  .format(DateTime(2023, i))),
+                                        ),
+                                    ],
+                                    onChanged: (value) {
+                                      DateTime firstDay =
+                                          DateTime(2023, value!, 1);
+                                      shiftProvider.month = value;
+                                      _itemScrollController.scrollTo(
+                                          index: firstDay.dayNumberOfYear(),
+                                          duration: const Duration(seconds: 1));
+                                    },
+                                  );
+                                },
+                              ),
                             ),
                           ),
                           Expanded(
@@ -83,8 +123,10 @@ class _ScheduleListState extends State<ScheduleList> {
                                   icon: const Icon(Icons.gps_fixed),
                                   onPressed: () {
                                     _itemScrollController.scrollTo(
-                                        index: DateTime.now().day - 1,
-                                        duration: const Duration(seconds: 1));
+                                        index:
+                                            DateTime.now().dayNumberOfYear() -
+                                                1,
+                                        duration: const Duration(seconds: 2));
                                   }),
                             ),
                           ),
@@ -96,10 +138,10 @@ class _ScheduleListState extends State<ScheduleList> {
                         color: const Color(0xFF202123),
                         child: ScrollablePositionedList.builder(
                           itemScrollController: _itemScrollController,
-                          initialScrollIndex: DateTime.now().day - 1,
+                          itemPositionsListener: _itemPositionsListener,
+                          initialScrollIndex: DateTime.now().dayNumberOfYear(),
                           itemBuilder: (context, index) {
-                            DateTime dateOfDay = DateTime(shiftProvider.year,
-                                shiftProvider.month, index + 1);
+                            DateTime dateOfDay = days[index];
 
                             Shift shift =
                                 shiftProvider.getShiftForDay(dateOfDay, shifts);
@@ -109,9 +151,7 @@ class _ScheduleListState extends State<ScheduleList> {
                               dateOfDay: dateOfDay,
                             );
                           },
-                          itemCount: DateTime(shiftProvider.year,
-                                  shiftProvider.month + 1, 0)
-                              .day,
+                          itemCount: days.length,
                         ),
                       ),
                     ),

@@ -14,24 +14,12 @@ class YearDropDown extends StatelessWidget {
       value: shiftProvider.year,
       items: const [
         DropdownMenuItem(
-          value: 2022,
-          child: Text('2022'),
-        ),
-        DropdownMenuItem(
           value: 2023,
           child: Text('2023'),
         ),
       ],
       onChanged: (value) {
         shiftProvider.year = value!;
-        final isShiftinList = shiftProvider.shifts
-            .where((shift) =>
-                shift.date.year == value &&
-                shift.date.month == shiftProvider.month)
-            .isNotEmpty;
-        if (!isShiftinList) {
-          shiftProvider.fetchShifts();
-        }
       },
     );
   }

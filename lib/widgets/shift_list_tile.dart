@@ -38,7 +38,7 @@ class ShiftListTile extends StatelessWidget {
               fontSize: 20.0,
               fontWeight: FontWeight.bold,
               fontFamily: 'Roboto',
-              color: shift.date.day == DateTime.now().day
+              color: shift.date.isSameDate(DateTime.now())
                   ? MyColors.springGreen.withAlpha(197)
                   : MyColors.platinum.withAlpha(154),
             ),
@@ -48,7 +48,7 @@ class ShiftListTile extends StatelessWidget {
             style: TextStyle(
               fontSize: 16.0,
               fontFamily: 'Roboto',
-              color: shift.date.day == DateTime.now().day
+              color: shift.date.isSameDate(DateTime.now())
                   ? MyColors.springGreen.withAlpha(197)
                   : MyColors.platinum.withAlpha(154),
             ),
