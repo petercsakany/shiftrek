@@ -52,11 +52,11 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const ElevatedButton(
+            /*const ElevatedButton(
               onPressed: null,
               child: Text('Monthly View'),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 20),*/
             ElevatedButton(
               onPressed: () {
                 Navigator.push(

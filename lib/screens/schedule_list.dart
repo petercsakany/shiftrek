@@ -49,10 +49,13 @@ class _ScheduleListState extends State<ScheduleList> {
             const Text('Schedule List v1.2'),
             TextButton.icon(
                 onPressed: null,
-                icon: Icon(shiftProvider.statusIcon),
+                icon: Icon(
+                  shiftProvider.statusIcon,
+                  color: shiftProvider.statusIconColor,
+                ),
                 label: shiftProvider.statusIcon == Icons.download_for_offline
                     ? Text('${shiftProvider.queryCount}')
-                    : const Text(''))
+                    : Text(shiftProvider.errormsg.toString()))
           ],
         ),
       ),
@@ -108,7 +111,7 @@ class _ScheduleListState extends State<ScheduleList> {
                                           DateTime(2023, value!, 1);
                                       shiftProvider.month = value;
                                       _itemScrollController.scrollTo(
-                                          index: firstDay.dayNumberOfYear(),
+                                          index: firstDay.dayNumberOfYear() + 1,
                                           duration: const Duration(seconds: 1));
                                     },
                                   );
@@ -123,9 +126,7 @@ class _ScheduleListState extends State<ScheduleList> {
                                   icon: const Icon(Icons.gps_fixed),
                                   onPressed: () {
                                     _itemScrollController.scrollTo(
-                                        index:
-                                            DateTime.now().dayNumberOfYear() -
-                                                1,
+                                        index: DateTime.now().dayNumberOfYear(),
                                         duration: const Duration(seconds: 2));
                                   }),
                             ),

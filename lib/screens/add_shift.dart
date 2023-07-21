@@ -205,27 +205,11 @@ class _AddShiftPageState extends State<AddShiftPage> {
                     snackShown = true;
                     if (widget.shiftToEdit != null) {
                       shiftProvider
-                          .updateShift(newShift..id = widget.shiftToEdit?.id)
-                          .whenComplete(() {
-                        showDialog(
-                            context: context,
-                            builder: ((context) {
-                              return AlertDialog(
-                                content: const Text('Shift Updated'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, true),
-                                    child: const Text('Close'),
-                                  ),
-                                ],
-                              );
-                            }));
-                      });
+                          .updateShift(newShift..id = widget.shiftToEdit?.id);
                     } else {
                       shiftProvider.addShift(newShift);
                     }
-                    if (!snackShown) Navigator.pop(context);
+                    Navigator.pop(context);
                   }
                 },
                 child: const Text('Save'),

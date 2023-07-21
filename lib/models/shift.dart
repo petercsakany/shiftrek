@@ -62,6 +62,9 @@ class Shift {
 
   double get getHours {
     double hours;
+    if (title == 'Holiday') {
+      return 8;
+    }
     int startTimeSec = (startTime.hour * 60 + startTime.minute) * 60;
     int endTimeSec = (endTime.hour * 60 + endTime.minute) * 60;
     int midNightSec = 24 * 60 * 60;

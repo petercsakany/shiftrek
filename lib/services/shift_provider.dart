@@ -40,6 +40,8 @@ class ShiftProvider with ChangeNotifier {
   }
 
   IconData statusIcon = Icons.download_for_offline;
+  Color statusIconColor = Colors.blueGrey;
+  String errormsg = "";
 
   int _year = DateTime.now().year;
   int _month = DateTime.now().month;
@@ -69,7 +71,9 @@ class ShiftProvider with ChangeNotifier {
     DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
 
     for (Shift shift in shifts) {
-      if (!shift.date.isBefore(startOfWeek) && !shift.date.isAfter(endOfWeek)) {
+      if (!shift.date.isBefore(startOfWeek) &&
+          !shift.date.isAfter(endOfWeek) &&
+          !shift.isOffDay) {
         hours += shift.getHours;
       }
     }
@@ -101,6 +105,7 @@ class ShiftProvider with ChangeNotifier {
     _isLoading = true;
     queryCount++;
     statusIcon = Icons.download_for_offline;
+    statusIconColor = Colors.green.shade500;
     final shiftsCollection = FirebaseFirestore.instance
         .collection('events')
         .where('date', isGreaterThanOrEqualTo: DateTime(year, 1, 1))
@@ -137,6 +142,7 @@ class ShiftProvider with ChangeNotifier {
           isOffDay: shift.isOffDay,
           color: shift.color));
       statusIcon = Icons.add_task;
+      statusIconColor = Colors.blue.shade500;
       notifyListeners();
     });
   }
@@ -146,13 +152,18 @@ class ShiftProvider with ChangeNotifier {
         .collection('events')
         .doc(newShift.id)
         .update(newShift.toMap())
-        .then((value) {
+        .onError((error, stackTrace) {
+      errormsg = error.toString();
+      return null;
+    }).then((value) {
       shifts[shifts.indexWhere((element) => element.id == newShift.id)] =
           newShift;
       statusIcon = Icons.update;
+      statusIconColor = Colors.yellow.shade500;
       notifyListeners();
     }).catchError((err) {
       statusIcon = Icons.error;
+      statusIconColor = Colors.red.shade500;
     });
   }
 
@@ -161,11 +172,17 @@ class ShiftProvider with ChangeNotifier {
     await shiftsCollection.doc(shift.id).delete();
     shiftsRem = _shifts.where((e) => e.id != shift.id).toList();
     statusIcon = Icons.delete_forever;
+    statusIconColor = Colors.deepOrange.shade500;
   }
 
   double getWagesAfterTax(double grossPay) {
     double wages = 0, paye = 0, usc = 0, prsi = 0;
     double taxCredits = MyRevenue.taxCredits;
+
+    if (grossPay == 0 || grossPay.isNaN) {
+      wages = 0;
+      return wages;
+    }
 
     //paye
     if (grossPay < MyRevenue.payeTreshold) {
