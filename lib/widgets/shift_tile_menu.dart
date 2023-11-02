@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../models/shift.dart';
 import '../screens/add_shift.dart';
 import '../services/shift_provider.dart';
-import '../services/utils.dart';
 
 class ShiftTileMenu extends StatelessWidget {
   final DateTime dateOfDay;
@@ -48,8 +47,8 @@ class ShiftTileMenu extends StatelessWidget {
           ),
           onTap: () {
             shiftProvider.copiedShift = shift;
-            ScaffoldMessenger.of(context)
-                .showSnackBar(snackBar('Shift copied'));
+            shiftProvider.statusIcon = Icons.copy_outlined;
+            shiftProvider.statusIconColor = Colors.blueGrey;
           },
         ),
         PopupMenuItem(
@@ -64,8 +63,6 @@ class ShiftTileMenu extends StatelessWidget {
           ),
           onTap: () {
             shiftProvider.pasteShift(dateOfDay);
-            ScaffoldMessenger.of(context)
-                .showSnackBar(snackBar('Shift pasted'));
           },
         ),
         PopupMenuItem(
