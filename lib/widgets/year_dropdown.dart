@@ -17,6 +17,10 @@ class YearDropDown extends StatelessWidget {
           value: 2023,
           child: Text('2023'),
         ),
+        DropdownMenuItem(
+          value: 2024,
+          child: Text('2024'),
+        ),
       ],
       onChanged: (value) {
         shiftProvider.year = value!;

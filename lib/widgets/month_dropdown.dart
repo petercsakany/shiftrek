@@ -18,8 +18,8 @@ class MonthDropDown extends StatelessWidget {
           DropdownMenuItem(
             value: i,
             child: Text(DateTime.now().month == i
-                ? DateFormat.MMMM().format(DateTime(2023, i))
-                : DateFormat.MMMM().format(DateTime(2023, i))),
+                ? DateFormat.MMMM().format(DateTime(shiftProvider.year, i))
+                : DateFormat.MMMM().format(DateTime(shiftProvider.year, i))),
           ),
       ],
       onChanged: (value) {
