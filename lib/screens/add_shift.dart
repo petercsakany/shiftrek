@@ -22,6 +22,7 @@ class _AddShiftPageState extends State<AddShiftPage> {
   late String _selectedTitle;
   late Color _selectedColor;
   late bool _isOffDay;
+  late String _cellName;
 
   final List<String> _titleList = ['Shift', 'Off Day', 'Holiday', 'Sick Leave'];
   final List<Color> _colorList = [
@@ -36,12 +37,13 @@ class _AddShiftPageState extends State<AddShiftPage> {
   void initState() {
     super.initState();
     if (widget.shiftToEdit == null) {
-      _selectedDate = DateTime.now();
+      _selectedDate = DateTime(2024, 1, 1);
       _selectedStartTime = TimeOfDay.now();
       _selectedEndTime = TimeOfDay.now();
       _selectedTitle = 'Shift';
       _selectedColor = const Color(0xFF81b051);
       _isOffDay = false;
+      _cellName = cellNames[DateTime.now().dayNumberOfYear() + 1];
     } else {
       _selectedDate = widget.shiftToEdit!.date;
       _selectedStartTime = widget.shiftToEdit!.startTime;
@@ -49,6 +51,7 @@ class _AddShiftPageState extends State<AddShiftPage> {
       _selectedTitle = widget.shiftToEdit!.title;
       _selectedColor = widget.shiftToEdit!.color;
       _isOffDay = widget.shiftToEdit!.isOffDay;
+      _cellName = widget.shiftToEdit!.cellName!;
     }
   }
 
@@ -57,7 +60,9 @@ class _AddShiftPageState extends State<AddShiftPage> {
     final shiftProvider = Provider.of<ShiftProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.shiftToEdit == null ? 'Add Shift' : 'Edit Shift'),
+        title: Text(widget.shiftToEdit == null
+            ? 'Add Shift $_cellName'
+            : 'Edit Shift $_cellName'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -195,19 +200,19 @@ class _AddShiftPageState extends State<AddShiftPage> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     Shift newShift = Shift(
-                      title: _selectedTitle,
-                      date: _selectedDate,
-                      startTime: _selectedStartTime,
-                      endTime: _selectedEndTime,
-                      isOffDay: _isOffDay,
-                      color: _selectedColor,
-                    );
+                        title: _selectedTitle,
+                        date: _selectedDate,
+                        startTime: _selectedStartTime,
+                        endTime: _selectedEndTime,
+                        isOffDay: _isOffDay,
+                        color: _selectedColor,
+                        cellName: _cellName);
                     snackShown = true;
                     if (widget.shiftToEdit != null) {
-                      shiftProvider
-                          .updateShift(newShift..id = widget.shiftToEdit?.id);
+                      //shiftProvider.updateShift(
+                      //newShift..cellName = widget.shiftToEdit?.cellName);
                     } else {
-                      shiftProvider.addShift(newShift);
+                      shiftProvider.addNewShift(newShift);
                     }
                     Navigator.pop(context);
                   }

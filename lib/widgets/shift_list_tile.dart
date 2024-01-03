@@ -78,7 +78,7 @@ class ShiftListTile extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              shift.date.weekday == 7 && shift.color != Colors.transparent
+              shift.date.weekday == 3 && shift.color != Colors.transparent
                   ? TextButton.icon(
                       onPressed: null,
                       icon: const Icon(
@@ -93,7 +93,7 @@ class ShiftListTile extends StatelessWidget {
                             fontSize: 12),
                       ))
                   : const Text(''),
-              shift.date.weekday == 7 && shift.color != Colors.transparent
+              shift.date.weekday == 3 && shift.color != Colors.transparent
                   ? TextButton.icon(
                       onPressed: null,
                       icon: const Icon(

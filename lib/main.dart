@@ -1,17 +1,11 @@
 // ignore_for_file: non_constant_identifier_names, avoid_print
-
 import 'package:shiftrek/screens/add_shift.dart';
 import 'package:shiftrek/screens/schedule_list.dart';
 import 'package:shiftrek/services/shift_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'firebase_options.dart';
 
-Future<void> main() async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+void main() async {
   runApp(const MyApp());
 }
 
@@ -52,11 +46,6 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            /*const ElevatedButton(
-              onPressed: null,
-              child: Text('Monthly View'),
-            ),
-            const SizedBox(height: 20),*/
             ElevatedButton(
               onPressed: () {
                 Navigator.push(

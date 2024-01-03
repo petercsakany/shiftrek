@@ -30,7 +30,7 @@ class _ScheduleListState extends State<ScheduleList> {
     _itemScrollController = ItemScrollController();
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (Provider.of<ShiftProvider>(context, listen: false).shifts.isEmpty) {
-        Provider.of<ShiftProvider>(context, listen: false).fetchShifts();
+        Provider.of<ShiftProvider>(context, listen: false).getShifts();
       }
     });
   }
@@ -39,14 +39,14 @@ class _ScheduleListState extends State<ScheduleList> {
   Widget build(BuildContext mainContext) {
     final shiftProvider = Provider.of<ShiftProvider>(mainContext);
     shifts = shiftProvider.shifts;
-    days = shiftProvider.getAllDaysOfYear(2023);
+    days = shiftProvider.getAllDaysOfYear(2024);
 
     return Scaffold(
       appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            const Text('Schedule List v1.2'),
+            const Text('Schedule List v1.3'),
             TextButton.icon(
                 onPressed: null,
                 icon: Icon(
@@ -87,13 +87,13 @@ class _ScheduleListState extends State<ScheduleList> {
                                 builder: (context, positions, _) {
                                   int? monthDisplayed;
                                   if (positions.isNotEmpty) {
-                                    monthDisplayed =
-                                        DateTime(DateTime.now().year, 1, 1)
-                                            .add(Duration(
-                                                days: positions.first.index))
-                                            .month;
+                                    monthDisplayed = DateTime(2024, 1, 1)
+                                        .add(Duration(
+                                            days: positions.first.index))
+                                        .month;
                                   }
                                   return DropdownButton<int>(
+                                    isExpanded: true,
                                     value: monthDisplayed,
                                     items: [
                                       for (int i = 1; i <= 12; i++)
@@ -101,14 +101,14 @@ class _ScheduleListState extends State<ScheduleList> {
                                           value: i,
                                           child: Text(DateTime.now().month == i
                                               ? DateFormat.MMMM()
-                                                  .format(DateTime(2023, i))
+                                                  .format(DateTime(2024, i))
                                               : DateFormat.MMMM()
-                                                  .format(DateTime(2023, i))),
+                                                  .format(DateTime(2024, i))),
                                         ),
                                     ],
                                     onChanged: (value) {
                                       DateTime firstDay =
-                                          DateTime(2023, value!, 1);
+                                          DateTime(2024, value!, 1);
                                       shiftProvider.month = value;
                                       _itemScrollController.scrollTo(
                                           index: firstDay.dayNumberOfYear() + 1,
@@ -125,6 +125,7 @@ class _ScheduleListState extends State<ScheduleList> {
                               child: IconButton(
                                   icon: const Icon(Icons.gps_fixed),
                                   onPressed: () {
+                                    shiftProvider.iterate();
                                     _itemScrollController.scrollTo(
                                         index: DateTime.now().dayNumberOfYear(),
                                         duration: const Duration(seconds: 2));
@@ -147,6 +148,7 @@ class _ScheduleListState extends State<ScheduleList> {
                             Shift shift =
                                 shiftProvider.getShiftForDay(dateOfDay, shifts);
 
+                            shift.cellName = cellNames[index];
                             return ShiftDismissible(
                               shift: shift,
                               dateOfDay: dateOfDay,

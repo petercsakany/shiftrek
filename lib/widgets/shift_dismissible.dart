@@ -68,7 +68,7 @@ class ShiftDismissible extends StatelessWidget {
       },
       onDismissed: (direction) {
         if (direction == DismissDirection.endToStart) {
-          Provider.of<ShiftProvider>(context, listen: false).deleteShift(shift);
+          //Provider.of<ShiftProvider>(context, listen: false).deleteShift(shift);
         }
       },
       child: ShiftListTile(
