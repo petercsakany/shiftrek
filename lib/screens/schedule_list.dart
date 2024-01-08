@@ -111,7 +111,7 @@ class _ScheduleListState extends State<ScheduleList> {
                                           DateTime(2024, value!, 1);
                                       shiftProvider.month = value;
                                       _itemScrollController.scrollTo(
-                                          index: firstDay.dayNumberOfYear() + 1,
+                                          index: firstDay.dayNumberOfYear(),
                                           duration: const Duration(seconds: 1));
                                     },
                                   );
@@ -125,7 +125,6 @@ class _ScheduleListState extends State<ScheduleList> {
                               child: IconButton(
                                   icon: const Icon(Icons.gps_fixed),
                                   onPressed: () {
-                                    shiftProvider.iterate();
                                     _itemScrollController.scrollTo(
                                         index: DateTime.now().dayNumberOfYear(),
                                         duration: const Duration(seconds: 2));
@@ -148,7 +147,6 @@ class _ScheduleListState extends State<ScheduleList> {
                             Shift shift =
                                 shiftProvider.getShiftForDay(dateOfDay, shifts);
 
-                            shift.cellName = cellNames[index];
                             return ShiftDismissible(
                               shift: shift,
                               dateOfDay: dateOfDay,

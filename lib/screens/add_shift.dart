@@ -22,13 +22,21 @@ class _AddShiftPageState extends State<AddShiftPage> {
   late String _selectedTitle;
   late Color _selectedColor;
   late bool _isOffDay;
-  late String _cellName;
+  late int _column;
+  late int _row;
 
-  final List<String> _titleList = ['Shift', 'Off Day', 'Holiday', 'Sick Leave'];
+  final List<String> _titleList = [
+    'Shift',
+    'Off Day',
+    'Holiday',
+    'Sick Leave',
+    ''
+  ];
   final List<Color> _colorList = [
     MyColors.oliveGreen,
     MyColors.ceruleanBlue,
     MyColors.ultramarineBlue,
+    Colors.transparent,
   ];
 
   late bool snackShown;
@@ -43,7 +51,8 @@ class _AddShiftPageState extends State<AddShiftPage> {
       _selectedTitle = 'Shift';
       _selectedColor = const Color(0xFF81b051);
       _isOffDay = false;
-      _cellName = cellNames[DateTime.now().dayNumberOfYear() + 1];
+      _column = 0;
+      _row = 0;
     } else {
       _selectedDate = widget.shiftToEdit!.date;
       _selectedStartTime = widget.shiftToEdit!.startTime;
@@ -51,7 +60,8 @@ class _AddShiftPageState extends State<AddShiftPage> {
       _selectedTitle = widget.shiftToEdit!.title;
       _selectedColor = widget.shiftToEdit!.color;
       _isOffDay = widget.shiftToEdit!.isOffDay;
-      _cellName = widget.shiftToEdit!.cellName!;
+      _column = widget.shiftToEdit!.column!;
+      _row = widget.shiftToEdit!.row!;
     }
   }
 
@@ -60,9 +70,7 @@ class _AddShiftPageState extends State<AddShiftPage> {
     final shiftProvider = Provider.of<ShiftProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.shiftToEdit == null
-            ? 'Add Shift $_cellName'
-            : 'Edit Shift $_cellName'),
+        title: Text(widget.shiftToEdit == null ? 'Add Shift' : 'Edit Shift'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -206,13 +214,18 @@ class _AddShiftPageState extends State<AddShiftPage> {
                         endTime: _selectedEndTime,
                         isOffDay: _isOffDay,
                         color: _selectedColor,
-                        cellName: _cellName);
+                        column: _column,
+                        row: _row);
                     snackShown = true;
                     if (widget.shiftToEdit != null) {
-                      //shiftProvider.updateShift(
-                      //newShift..cellName = widget.shiftToEdit?.cellName);
+                      shiftProvider.updateShift(newShift);
                     } else {
-                      shiftProvider.addNewShift(newShift);
+                      Shift addShift = shiftProvider.shifts[shiftProvider.shifts
+                          .indexWhere((element) =>
+                              element.date.isSameDate(newShift.date))];
+                      newShift.column = addShift.column;
+                      newShift.row = addShift.row;
+                      shiftProvider.updateShift(newShift);
                     }
                     Navigator.pop(context);
                   }

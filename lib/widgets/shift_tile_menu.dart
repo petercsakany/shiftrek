@@ -38,8 +38,8 @@ class ShiftTileMenu extends StatelessWidget {
         PopupMenuItem(
           value: 'copy',
           enabled: !shiftProvider.isCopied && shift.color != Colors.transparent,
-          child: Row(
-            children: const [
+          child: const Row(
+            children: [
               Icon(Icons.content_copy),
               SizedBox(width: 8.0),
               Text('Copy'),
@@ -54,21 +54,21 @@ class ShiftTileMenu extends StatelessWidget {
         PopupMenuItem(
           value: 'paste',
           enabled: shiftProvider.isCopied,
-          child: Row(
-            children: const [
+          child: const Row(
+            children: [
               Icon(Icons.content_paste),
               SizedBox(width: 8.0),
               Text('Paste'),
             ],
           ),
           onTap: () {
-            shiftProvider.pasteShift(dateOfDay);
+            shiftProvider.pasteShift(shift);
           },
         ),
         PopupMenuItem(
           value: 'edit',
-          child: Row(
-            children: const [
+          child: const Row(
+            children: [
               Icon(Icons.edit),
               SizedBox(width: 8.0),
               Text('Edit'),

@@ -1,11 +1,10 @@
-// ignore_for_file: avoid_print
-
 import 'package:shiftrek/services/utils.dart';
 import 'package:flutter/material.dart';
 
 class Shift {
   String? id;
-  String? cellName;
+  int? column;
+  int? row;
   final String title;
   final DateTime date;
   final TimeOfDay startTime;
@@ -15,7 +14,8 @@ class Shift {
 
   Shift({
     this.id,
-    this.cellName,
+    this.column,
+    this.row,
     required this.title,
     required this.date,
     required this.startTime,
@@ -24,63 +24,13 @@ class Shift {
     required this.color,
   });
 
-  Shift.empty(DateTime dateData)
+  Shift.empty(DateTime dateData, int this.column, int this.row)
       : title = '',
         date = dateData,
         startTime = const TimeOfDay(hour: 0, minute: 0),
         endTime = const TimeOfDay(hour: 0, minute: 0),
         isOffDay = false,
         color = Colors.transparent;
-
-  /*factory Shift.fromDocument(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    return Shift(
-      id: doc.id,
-      title: data['title'],
-      date: (data['date'] as Timestamp).toDate(),
-      startTime: firebaseToTimeOfDay(data['startTime']),
-      endTime: firebaseToTimeOfDay(data['endTime']),
-      isOffDay: data['isOffDay'],
-      color: Color(data['color']),
-    );
-  }*/
-
-  factory Shift.fromJson(Map<String, dynamic> json) {
-    return Shift(
-        title: json['title'],
-        date: DateTime.parse(json['date']),
-        startTime: TimeOfDay(
-            hour: int.parse(json['startTime'].split(':')[0]),
-            minute: int.parse(json['startTime'].split(':')[1])),
-        endTime: TimeOfDay(
-            hour: int.parse(json['endTime'].split(':')[0]),
-            minute: int.parse(json['endTime'].split(':')[1])),
-        isOffDay: json['isOffDay'] == 'true',
-        color: Color(json['color']),
-        cellName: json['cellName']);
-  }
-
-  /*Map<String, dynamic> toMap() {
-    return {
-      'title': title,
-      'date': Timestamp.fromDate(date),
-      'startTime': timeOfDayToFirebase(startTime),
-      'endTimeHour': timeOfDayToFirebase(endTime),
-      'isOffDay': isOffDay,
-      'color': color.value,
-    };
-  }*/
-
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'date': date.toIso8601String(),
-      'startTime': startTime.toString(),
-      'endTime': endTime.toString(),
-      'isOffDay': isOffDay.toString(),
-      'cellName': cellName
-    };
-  }
 
   String get timeRange {
     String range = '${startTime.to24hours()} - ${endTime.to24hours()}';

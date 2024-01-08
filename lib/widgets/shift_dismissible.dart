@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+// ignore: unused_import
 import 'package:provider/provider.dart';
 import 'package:shiftrek/widgets/shift_list_tile.dart';
 
 import '../models/shift.dart';
+// ignore: unused_import
 import '../services/shift_provider.dart';
 
 class ShiftDismissible extends StatelessWidget {
@@ -23,11 +25,11 @@ class ShiftDismissible extends StatelessWidget {
           : DismissDirection.endToStart,
       background: Container(
         color: Colors.red,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+        child: const Padding(
+          padding: EdgeInsets.all(16.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: const [
+            children: [
               Icon(Icons.delete, color: Colors.white),
               SizedBox(width: 8.0),
               Text(

@@ -3,8 +3,6 @@
 import 'package:shiftrek/models/shift.dart';
 import 'package:shiftrek/services/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:gsheets/gsheets.dart';
 
 import 'credentials.dart';
@@ -67,7 +65,7 @@ class ShiftProvider with ChangeNotifier {
   Shift getShiftForDay(DateTime day, List<Shift> shifts) {
     return shifts.firstWhere((shift) {
       return shift.date.isSameDate(day);
-    }, orElse: () => Shift.empty(day));
+    });
   }
 
   double getShiftHoursForWeek(DateTime startDate) {
@@ -117,7 +115,10 @@ class ShiftProvider with ChangeNotifier {
     };
   }
 
-  void iterate() async {
+  void getShifts() async {
+    _isLoading = true;
+    queryCount++;
+
     final ss = await gsheets.spreadsheet(spreadsheetId);
     final sheet = ss.worksheetByTitle('24');
 
@@ -125,136 +126,102 @@ class ShiftProvider with ChangeNotifier {
       throw Exception('Sheet not found');
     }
 
-    await sheet.values.allRows().then((table) {
-      for (var row = 1; row < 2; row++) {
+    await sheet.values.allRows(fromRow: 2).then((table) {
+      for (var row = 0; row < table.length; row += 2) {
         for (var col = 0; col < 7; col++) {
-          DateTime date = sheetToDate(table[row][col]);
-          print(date);
           if (row < table.length - 1) {
+            DateTime date = sheetToDate(table[row][col]);
             String cell = table[row + 1][col];
+
             if (cell != '.' && cell != 'Holiday' && cell != 'Off Day') {
               List<String> timeRange = cell.split('-');
-              print(sheetToTime(timeRange[0]).to24hours());
+              _shifts.add(Shift(
+                title: 'Shift',
+                date: date,
+                startTime: sheetToTime(timeRange[0]),
+                endTime: sheetToTime(timeRange[1]),
+                isOffDay: false,
+                color: MyColors.oliveGreen,
+                column: col + 1,
+                row: row + 3,
+              ));
+            } else if (cell == 'Off Day') {
+              _shifts.add(Shift(
+                title: 'Off Day',
+                date: date,
+                startTime: const TimeOfDay(hour: 0, minute: 0),
+                endTime: const TimeOfDay(hour: 0, minute: 0),
+                isOffDay: true,
+                color: MyColors.ceruleanBlue,
+                column: col + 1,
+                row: row + 3,
+              ));
+            } else if (cell == 'Holiday') {
+              _shifts.add(Shift(
+                title: 'Holiday',
+                date: date,
+                startTime: const TimeOfDay(hour: 0, minute: 0),
+                endTime: const TimeOfDay(hour: 0, minute: 0),
+                isOffDay: false,
+                color: MyColors.ultramarineBlue,
+                column: col + 1,
+                row: row + 3,
+              ));
+            } else if (cell == '.') {
+              _shifts.add(Shift.empty(date, col + 1, row + 3));
             }
           }
         }
       }
+      _isLoading = false;
+      statusIcon = Icons.download_for_offline;
+      statusIconColor = Colors.green.shade500;
+      notifyListeners();
     });
   }
 
-  Future<void> getShifts() async {
-    _isLoading = false;
-    queryCount++;
+  void updateShift(Shift shift) async {
+    final ss = await gsheets.spreadsheet(spreadsheetId);
+    final sheet = ss.worksheetByTitle('24');
 
-    final response = await http.get(Uri.parse(uri));
-
-    if (response.statusCode == 200) {
-      List<dynamic> shiftsJson = json.decode(response.body);
-
-      //shifts = shiftsJson.map((json) => Shift.fromJson(json)).toList();
-      statusIcon = Icons.download_for_offline;
-      statusIconColor = Colors.green.shade500;
-    } else {
-      statusIcon = Icons.error;
-      statusIconColor = Colors.red.shade500;
-      errormsg = 'Error';
+    if (sheet == null) {
+      throw Exception('Sheet not found');
     }
-    _isLoading = false;
-    notifyListeners();
+
+    String cellValue =
+        '${shift.startTime.to24hours()} - ${shift.endTime.to24hours()}';
+
+    if (shift.title == 'Off Day' || shift.title == 'Holiday') {
+      cellValue = shift.title;
+    }
+
+    await sheet.values
+        .insertValue(cellValue, column: shift.column!, row: shift.row!)
+        .then((value) {
+      if (value) {
+        shifts[shifts.indexWhere(
+            (element) => element.date.isSameDate(shift.date))] = shift;
+        statusIcon = Icons.update;
+        statusIconColor = Colors.yellow.shade500;
+        notifyListeners();
+      }
+    });
   }
 
-  Future<void> addNewShift(Shift shift) async {
-    final String jsonData = jsonEncode(shift.toJson());
-    const String url = uri;
-
-    final response = await http.post(Uri.parse(url),
-        headers: {'Content-Type': 'application/json'}, body: jsonData);
-
-    if (response.statusCode == 200) {
-      _shifts.add(shift);
-      statusIcon = Icons.add_task;
-      statusIconColor = Colors.blue.shade500;
-    } else {
-      statusIcon = Icons.error;
-      statusIconColor = Colors.red.shade500;
-      errormsg = 'Error adding';
-    }
-    notifyListeners();
-  }
-
-  /*Future<void> fetchShifts() async {
-    _isLoading = true;
-    queryCount++;
-    statusIcon = Icons.download_for_offline;
-    statusIconColor = Colors.green.shade500;
-    final shiftsCollection = FirebaseFirestore.instance
-        .collection('events')
-        .where('date', isGreaterThanOrEqualTo: DateTime(year, 1, 1))
-        .where('date', isLessThanOrEqualTo: DateTime(year, 12, 31));
-    final snapshot =
-        await shiftsCollection.get().whenComplete(() => _isLoading = false);
-    shifts = snapshot.docs.map((doc) => Shift.fromDocument(doc)).toList();
-  }*/
-
-  void pasteShift(DateTime date) {
+  void pasteShift(Shift originalShift) {
     if (_copiedShift != null && isCopied) {
-      //addShift(_copiedShift!, date);
+      updateShift(Shift(
+          date: originalShift.date,
+          column: originalShift.column,
+          row: originalShift.row,
+          title: _copiedShift!.title,
+          startTime: _copiedShift!.startTime,
+          endTime: _copiedShift!.endTime,
+          isOffDay: _copiedShift!.isOffDay,
+          color: _copiedShift!.color));
       isCopied = false;
     }
   }
-
-  /*void addShift(Shift shift, [DateTime? newDate]) {
-    DateTime shiftDate = newDate ?? shift.date;
-
-    FirebaseFirestore.instance.collection('events').add({
-      'title': shift.title,
-      'date': Timestamp.fromDate(shiftDate),
-      'startTime': timeOfDayToFirebase(shift.startTime),
-      'endTime': timeOfDayToFirebase(shift.endTime),
-      'isOffDay': shift.isOffDay,
-      'color': shift.color.value,
-    }).then((value) {
-      _shifts.add(Shift(
-          id: value.id,
-          title: shift.title,
-          date: shiftDate,
-          startTime: shift.startTime,
-          endTime: shift.endTime,
-          isOffDay: shift.isOffDay,
-          color: shift.color));
-      statusIcon = Icons.add_task;
-      statusIconColor = Colors.blue.shade500;
-      notifyListeners();
-    });
-  }*/
-
-  /*Future<void> updateShift(Shift newShift) {
-    return FirebaseFirestore.instance
-        .collection('events')
-        .doc(newShift.id)
-        .update(newShift.toMap())
-        .onError((error, stackTrace) {
-      errormsg = error.toString();
-      return null;
-    }).then((value) {
-      shifts[shifts.indexWhere((element) => element.id == newShift.id)] =
-          newShift;
-      statusIcon = Icons.update;
-      statusIconColor = Colors.yellow.shade500;
-      notifyListeners();
-    }).catchError((err) {
-      statusIcon = Icons.error;
-      statusIconColor = Colors.red.shade500;
-    });
-  }*/
-
-  /*Future<void> deleteShift(Shift shift) async {
-    final shiftsCollection = FirebaseFirestore.instance.collection('events');
-    await shiftsCollection.doc(shift.id).delete();
-    shiftsRem = _shifts.where((e) => e.id != shift.id).toList();
-    statusIcon = Icons.delete_forever;
-    statusIconColor = Colors.deepOrange.shade500;
-  }*/
 
   double getWagesAfterTax(double grossPay) {
     double wages = 0, paye = 0, usc = 0, prsi = 0;

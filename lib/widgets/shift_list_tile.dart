@@ -56,7 +56,7 @@ class ShiftListTile extends StatelessWidget {
         ],
       ),
       title: Text(
-        shift.title,
+        '${shift.title}-${shift.row}:${shift.column}',
         style: TextStyle(
           fontSize: 16.0,
           fontWeight: FontWeight.bold,
